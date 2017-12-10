@@ -25,7 +25,9 @@
 
         <label for="mail">Email:</label>
         <input type="email" id="mail" name="user_email">
-
+        <div class="emailErrorMessage">
+          <p style="color: red">Not a valid email</p>
+        </div>
         <label for="title">Job Role</label>
         <select id="title" name="user_title">
           <option value="full-stack js developer">Full Stack JavaScript Developer</option>
@@ -35,6 +37,10 @@
           <option value="student">Student</option>
           <option value="other">Other</option>
         </select>
+      </fieldset>
+      <fieldset class="other-jobrole-fieldset">
+        <label for="other-title">Job Role</label>
+        <input type="text" id="other-title" placeholder="Your Job Role">
       </fieldset>
 
       <fieldset class="shirt">
@@ -74,13 +80,13 @@
 
       <fieldset class="activities">
         <legend>Register for Activities</legend>
-        <label><input type="checkbox" name="all"> Main Conference — $200</label>
-        <label><input type="checkbox" name="js-frameworks"> JavaScript Frameworks Workshop — Tuesday 9am-12pm, $100</label>
-        <label><input type="checkbox" name="js-libs"> JavaScript Libraries Workshop — Tuesday 1pm-4pm, $100</label>
-        <label><input type="checkbox" name="express"> Express Workshop — Tuesday 9am-12pm, $100</label>
-        <label><input type="checkbox" name="node"> Node.js Workshop — Tuesday 1pm-4pm, $100</label>
-        <label><input type="checkbox" name="build-tools"> Build tools Workshop — Wednesday 9am-12pm, $100</label>
-        <label><input type="checkbox" name="npm"> npm Workshop — Wednesday 1pm-4pm, $100</label>
+        <label><input type="checkbox" name="all" data-price="200"> Main Conference — $200</label>
+        <label><input type="checkbox" name="js-frameworks" data-day="Tuesday" data-starttime="9" data-price="100"> JavaScript Frameworks Workshop — Tuesday 9am-12pm, $100</label>
+        <label><input type="checkbox" name="js-libs" data-day="Tuesday" data-starttime="1" data-price="100"> JavaScript Libraries Workshop — Tuesday 1pm-4pm, $100</label>
+        <label><input type="checkbox" name="express" data-day="Tuesday" data-starttime="9" data-price="100"> Express Workshop — Tuesday 9am-12pm, $100</label>
+        <label><input type="checkbox" name="node" data-day="Tuesday" data-starttime="1" data-price="100"> Node.js Workshop — Tuesday 1pm-4pm, $100</label>
+        <label><input type="checkbox" name="build-tools" data-day="Wednesday" data-starttime="9" data-price="100"> Build tools Workshop — Wednesday 9am-12pm, $100</label>
+        <label><input type="checkbox" name="npm" data-day="Wednesday" data-starttime="1" data-price="100"> npm Workshop — Wednesday 1pm-4pm, $100</label>
 
       </fieldset>
       <fieldset>
@@ -98,17 +104,17 @@
 
           <div class="col-6 col">
             <label for="cc-num">Card Number:</label>
-        	  <input id="cc-num" name="user_cc-num" type="text">
+        	  <input id="cc-num" name="user_cc-num" type="text" maxlength="16">
           </div>
 
           <div class="col-3 col">
             <label for="zip">Zip Code:</label>
-            <input id="zip" name="user_zip" type="text">
+            <input id="zip" name="user_zip" type="text" maxlength="5">
           </div>
 
           <div class="col-3 col">
             <label for="cvv">CVV:</label>
-            <input id="cvv" name="user_cvv" type="text">
+            <input id="cvv" name="user_cvv" type="text" maxlength="3">
           </div>
 
           <label for="exp-month">Expiration Date:</label>
@@ -151,6 +157,10 @@
     </form>
 
 	</div>
-   <script src='main.js'></script>
+  <script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
