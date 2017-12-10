@@ -9,8 +9,8 @@ $(document).ready(function() {
     'cvv': 'cvv is wrong', //errorMessage.'cvv'
 };
 
-document.getElementById('name').focus();
-$('.other-jobrole-fieldset').hide(); //hide the other job role intially
-$('#colors-js-puns').hide();
-$('.emailErrorMessage').hide();
+  document.getElementById('name').focus();
+  $('.other-jobrole-fieldset').hide(); //hide the other job role intially
+  $('#colors-js-puns').hide();
+  $('.emailErrorMessage').hide();
 });
