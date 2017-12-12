@@ -1,5 +1,4 @@
 // Set focus on the first text field
-// puts the name field in focus on load and hides selected elements
 $( document ).ready( function(){
   $("#name").focus();
   hideParagraphs();
@@ -7,13 +6,11 @@ $( document ).ready( function(){
 });
 
 // Job Role section of the form. Reveal a text field when the "Other" option is selected from the "Job Role" drop down menu
-// function which creates the other job title text field
 var createJobTitleField = function() {
 	$("fieldset:first").append("<input type='text' id='other-title' placeholder='Your Title'>");
 };
 
-// T-Shirt Info section of the form. For the T-Shirt color menu, only display the options that match the design selected in the "Design" menu.
-// I would do this differently if I had to do it again, but it works
+// T-Shirt Info section of the form. For the T-Shirt color menu
 var arrayOfColors = $.makeArray($("#color").children());
 
 // function which removes all the color options
@@ -21,7 +18,7 @@ var removeAllColorOptions = function() {
 	$("#color").children().remove();
 };
 
-// adds the event listener and function to add other job title text field
+// adds the event listener
 $("#title").change(function(){
 	if ($("#title").val() === "other"){
 		createJobTitleField();
@@ -31,7 +28,6 @@ $("#title").change(function(){
 });
 
 // this section changes the design color drop down menu
-// I don't like this solution, but this is what I came up with first and it works.
 $("#design").change(function() {
 	if ($("#design").val() === "Select Theme") {
 	hideColorOptions();
@@ -70,7 +66,6 @@ $("#design").change(function() {
 });
 
 var totalCost = 0;
-// if I did this again, I would use a function in place of this global variable
 // this updates the total cost of the boxes selected
 $('[type=checkbox]').change(function(){
 	if ( $(this)['0'].checked && $(this)['0'].name === "all"){
@@ -94,8 +89,7 @@ var createTotal = function(htmlString, totalCost) {
 	}
 };
 
-// this is the section where I disable activities that are scheduled at the same time. I spent a lot of time working
-// on a general solution, but the data is storied as innerHTML, and tyring to parse it was way too hard.
+// this is the section where I disable activities that are scheduled at the same time.
 var arrayOfActivities = $.makeArray($('.activities label'));
 
 $('[type=checkbox]').change(function(){
@@ -123,7 +117,7 @@ $('[type=checkbox]').change(function(){
 
 });
 
-// this is the part that changes what is displayed based on the payment option selected
+//changes what is displayed based on the payment option selected
 $("#payment").change(function(){
 	if ($(this).val() === "credit card") {
 		hideParagraphs();
@@ -142,7 +136,6 @@ $("#payment").change(function(){
 });
 
 // button mousedown function which checks validation
-// now this, this I like this solution
 $("button").click(function(event) {
 	isFormValid(event);
 });
@@ -201,8 +194,8 @@ function validEmailAddress() {
 	return validEmail.test($("#mail").val());
 }
 
-// function which checks to see if a tee-shirt has been selected .
-function teeShirtSelected() {
+// function which checks to see if a t-shirt has been selected .
+function tShirtSelected() {
 		return (!($("#design").val() == "Select Theme")) ? true : false;
 }
 
@@ -218,7 +211,6 @@ function activitySelected() {
 }
 
 // function which determins if a zip code and 3 digit ccv number has been selected
-// I didn't validate these, I could but it's time to move on to the next project, and it's an unrequested feature.
 function ccvAndZipEntered() {
 	var zipVal = /^\d{5}$|^\d{5}-\d{4}$/;
 	var cvvVal = /^\d{3}$/;
@@ -226,7 +218,6 @@ function ccvAndZipEntered() {
 }
 
 // functioin which checks the validity of the credit card number entered
-// pulled this from DiegoSalazar on github. I don't need to reinvent the wheel
 function validCreditCard(value) {
   // accept only digits, dashes or spaces
 	if (/[^0-9-\s]+/.test(value)) return false;
@@ -245,7 +236,7 @@ function validCreditCard(value) {
 	return (nCheck % 10) === 0;
 }
 
-// function which resets the form colors on submission, so they are black if corrected
+// resets the form colors on submission, so they are black if corrected
 function resetFormColors() {
 	$(".shirt legend p").remove();
 	$("label[for='name']").text("Name:").css("color", "black");
