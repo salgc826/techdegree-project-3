@@ -13,10 +13,7 @@ var addJobTitleField = function() {
 // T-Shirt Info section of the form. For the T-Shirt color menu
 var arrayOfColors = $.makeArray($("#color").children());
 
-// function which removes all the color options
-var removeAllColorOptions = function() {
-	$("#color").children().remove();
-};
+
 
 // adds the event listener
 $("#title").change(function(){
