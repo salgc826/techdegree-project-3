@@ -6,7 +6,7 @@ $( document ).ready( function(){
 });
 
 // Job Role section of the form. Reveal a text field when the "Other" option is selected from the "Job Role" drop down menu
-var createJobTitleField = function() {
+var addJobTitleField = function() {
 	$("fieldset:first").append("<input type='text' id='other-title' placeholder='Your Title'>");
 };
 
@@ -21,7 +21,7 @@ var removeAllColorOptions = function() {
 // adds the event listener
 $("#title").change(function(){
 	if ($("#title").val() === "other"){
-		createJobTitleField();
+		addJobTitleField();
 	} else {
 		$("#other-title").remove();
 	}
