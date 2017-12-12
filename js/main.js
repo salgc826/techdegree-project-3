@@ -1,244 +1,271 @@
-$(document).ready(function() {
-
-  errorMessage = {
-    'name': 'Please add a name', //errorMessages.name
-    'email': 'Please add a email', //errorMessages.email
-    'activities': 'Please add at least one activity', //errorMessages.activities
-    'creditcard': 'Credit Card Number is wrong', //errorMessages.creditcard
-    'zipcode': 'zipcode is wrong', //errorMessages.zipcode
-    'cvv': 'cvv is wrong', //errorMessages.'cvv
-  };
-
-  document.getElementById('name').focus();
-  $('.other-jobrole-fieldset').hide(); //hide the other job role initially
-  $('#colors-js-puns').hide();
-  $('.emailErrorMessage').hide();
+// Set focus on the first text field
+// puts the name field in focus on load and hides selected elements
+$( document ).ready( function(){
+  $("#name").focus();
+  hideParagraphs();
+  hideColorOptions();
 });
 
-//A text field that will be revealed when the "Other" option is selected from the "Job Role" drop down menu
-document.getElementById('title').onchange = function() {
-  //get the selected text
-  const selectedValue = this.selectedIndex;
-  const inputText = this.children[selectedValue].innerHTML.trim();
-  //if selected text is other
-  if (inputText === 'Other') {
-    //add textfield
-    $('.other-jobrole-fieldset').show();
-  }
+// Job Role section of the form. Reveal a text field when the "Other" option is selected from the "Job Role" drop down menu
+// function which creates the other job title text field
+var createJobTitleField = function() {
+	$("fieldset:first").append("<input type='text' id='other-title' placeholder='Your Title'>");
 };
 
-//http://jsfiddle.net/9Jz7p/1/
-$( "#design" ).select(function() {
-  //$( "div" ).text( "Something was selected" ).show().fadeOut( 1000 );
-console.log('test');
+// T-Shirt Info section of the form. For the T-Shirt color menu, only display the options that match the design selected in the "Design" menu.
+// I would do this differently if I had to do it again, but it works
+var arrayOfColors = $.makeArray($("#color").children());
+
+// function which removes all the color options
+var removeAllColorOptions = function() {
+	$("#color").children().remove();
+};
+
+// adds the event listener and function to add other job title text field
+$("#title").change(function(){
+	if ($("#title").val() === "other"){
+		createJobTitleField();
+	} else {
+		$("#other-title").remove();
+	}
 });
 
-$('#design').on('change', function() {
-  let SelectedDesign = $(this).val(); //get value of selected design
-  const designOptions = $('#color option'); //select the design
-
-  //if option 2 or 3 is chosen -> show the field()
-if (SelectedDesign === 'js puns' || SelectedDesign === 'heart js') {
-  $('#colors-js-puns').show();
+// this section changes the design color drop down menu
+// I don't like this solution, but this is what I came up with first and it works.
+$("#design").change(function() {
+	if ($("#design").val() === "Select Theme") {
+	hideColorOptions();
 } else {
-  $('#colors-js-puns').hide();
+	displayColorOptions();
+	removeAllColorOptions();
+	var jsPuns = "(JS Puns shirt only)";
+	var hearJS = "(I";
+	switch( $("#design").val() ) {
+		case "js puns":
+			arrayOfColors.forEach(function(colorChoice){
+				var colorOption = colorChoice.innerHTML;
+				if (colorOption.indexOf(jsPuns) !== -1) {
+					$("#color").append(colorChoice);
+				}
+				$("#color")[0].selectedIndex = 0;
+			});
+
+			break;
+		case "heart js":
+			arrayOfColors.forEach(function(colorChoice){
+				var colorOption = colorChoice.innerHTML;
+				if (colorOption.indexOf(hearJS) !== -1) {
+					$("#color").append(colorChoice);
+				}
+				$("#color")[0].selectedIndex = 0;
+			});
+			break;
+		case "Select Theme":
+				arrayOfColors.forEach(function(colorChoice){
+					$("#color").append(colorChoice);
+			});
+				$("#color")[0].selectedIndex = 0;
+	}
 }
+});
 
+var totalCost = 0;
+// if I did this again, I would use a function in place of this global variable
+// this updates the total cost of the boxes selected
+$('[type=checkbox]').change(function(){
+	if ( $(this)['0'].checked && $(this)['0'].name === "all"){
+		totalCost += 200;
+	} else if (!($(this)['0'].checked) && $(this)['0'].name === "all") {
+		totalCost -= 200;
+	} else if ($(this)['0'].checked) {
+		totalCost += 100;
+	} else {
+		totalCost -= 100;
+	}
+	var htmlString = "<p id='total'> Total $" + totalCost + "</p>";
+	createTotal(htmlString, totalCost);
+});
 
+// function which creates the total at the bottom of the selections
+var createTotal = function(htmlString, totalCost) {
+	$("#total").remove();
+	if (totalCost !== 0) {
+		$(".activities").append($(htmlString));
+	}
+};
 
-  $(designOptions).show();
-  if (SelectedDesign === 'js puns') { //
-    console.log('js puns');
-    for (let i = 3; i < 6; i++) { //remove the first 3 options
-      $(designOptions[i]).remove();
-      console.log(designOptions[i]);
+// this is the section where I disable activities that are scheduled at the same time. I spent a lot of time working
+// on a general solution, but the data is storied as innerHTML, and tyring to parse it was way too hard.
+var arrayOfActivities = $.makeArray($('.activities label'));
 
-    }
-  }
-  if (SelectedDesign === 'heart js') {
-    console.log('heart js');
-    for (let i = 0; i < 3; i++) { //remove the last 3 options
-      $(designOptions[i]).remove();
-      console.log(designOptions[i]);
-    }
-  }
+$('[type=checkbox]').change(function(){
+	// don't like this so much, but it works
+	if ($(this)['0'].name === 'js-libs' && $(this)['0'].checked) {
+		arrayOfActivities[4].children['0'].disabled = true;
+	} else if ($(this)['0'].name === 'js-libs' && !$(this)['0'].checked) {
+		arrayOfActivities[4].children['0'].disabled = false;
 
+	} else if ($(this)['0'].name === 'node' && $(this)['0'].checked) {
+		arrayOfActivities[2].children['0'].disabled = true;
+	} else if ($(this)['0'].name === 'node' && !$(this)['0'].checked) {
+		arrayOfActivities[2].children['0'].disabled = false;
+
+	} else if ($(this)['0'].name === 'js-frameworks' && $(this)['0'].checked) {
+		arrayOfActivities[3].children['0'].disabled = true;
+	} else if ($(this)['0'].name === 'js-frameworks' && !$(this)['0'].checked) {
+		arrayOfActivities[3].children['0'].disabled = false;
+
+	} else if ($(this)['0'].name === 'express' && $(this)['0'].checked) {
+		arrayOfActivities[1].children['0'].disabled = true;
+	} else if ($(this)['0'].name === 'express' && !$(this)['0'].checked) {
+		arrayOfActivities[1].children['0'].disabled = false;
+	}
 
 });
 
-//THE Price info
-const activitieVars = $('.activities').find('input');
-const priceTag = '<div id="price">0</div>'; //create the pricetag
-$(priceTag).insertAfter('.activities'); //insert After the fieldset
-
-$(activitieVars).change(function() { //detect checkbox change
-  calculateTotalPrice();
+// this is the part that changes what is displayed based on the payment option selected
+$("#payment").change(function(){
+	if ($(this).val() === "credit card") {
+		hideParagraphs();
+		$("#credit-card").removeClass("is-hidden");
+	} else if ($(this).val() === "paypal") {
+		$("#credit-card").addClass("is-hidden");
+		$("fieldset:last div p")['0'].classList = "";
+		$("fieldset:last div p")['1'].classList = "is-hidden";
+	} else if ($(this).val() === "bitcoin") {
+		$("#credit-card").addClass("is-hidden");
+		$("fieldset:last div p")['0'].classList = "is-hidden";
+		$("fieldset:last div p")['1'].classList = "";
+	} else if ($(this).val() === "select_method") {
+		$("#credit-card").removeClass("is-hidden");
+	}
 });
 
-function calculateTotalPrice() {
-  let TotalPrice = 0; //initial price
-  $("input[type=checkbox]:checked").each(function() { //only the checked fields
-    TotalPrice += Number($(this).data('price')); //sum
-  });
-  $('#price').text(TotalPrice); //display the TotalPRice
-}
-
-//check time collision
-var EventDay = $(activitieVars).data('day');
-var EventTime = $(activitieVars).data('starttime');
-
-$('.activities').on('change', function() {
-  //2 and 4 are the same  --
-  console.log('change activity option');
-  const activityOptions = $('.activities input'); //select the first checkboxOption
-  const activityOption_1 = activityOptions[1];
-
-  // third checkboxOption
-  const activityOption_2 = activityOptions[3];
-  if (activityOption_1.checked === true) {
-    $(activityOption_2).attr('disabled', true);;
-  } else {
-    $(activityOption_2).attr('disabled', false);;
-  }
-
-  if (activityOption_2.checked === true) {
-    $(activityOption_1).attr('disabled', true);;
-  } else {
-    $(activityOption_1).attr('disabled', false);;
-
-  }
+// button mousedown function which checks validation
+// now this, this I like this solution
+$("button").click(function(event) {
+	isFormValid(event);
 });
 
-let errorNameCount = 0; //initial value
-function validateName() {
-  console.log('validating name');
-  if ($('#name').val().length === 0) { //if input has no value
-    errorNameCount++;
-    if (errorNameCount <= 1) {
-      const errorMessageName = '<span style="color: red" class="errorMessageName">' + errorMessage.name + '</span>'
-      $(errorMessageName).insertAfter($('#name'));
-    }
-    console.log('errorNameCount: ' + errorNameCount);
-  } else {
-    errorNameCount = 0; //reset error counter
-    $('.errorMessageName').hide(); //hide the error message
-  }
+// checks the validity of the form
+function isFormValid(event) {
+	resetFormColors();
+	var invalidateForm = false;
+	if (!nameEntered()) {
+		$("label[for='name']").text("Name: (Please provide your name)").css("color", "red");
+		invalidateForm = true;
+	}
+	if (!validEmailAddress()) {
+		$("label[for='mail']").text("Email: (Please provide a valid email address)").css("color", "red");
+		invalidateForm = true;
+	}
+	if (!activitySelected()) {
+		$(".activities legend").css("color", "red");
+		invalidateForm = true;
+	}
+	if (!teeShirtSelected()) {
+		console.log("invalide tee-shirt");
+		console.log($("#design").val());
+		$(".shirt legend").append("<p>Don't forget to pick a T-Shirt</p>");
+		$(".shirt legend p").css("color", "red");
+		invalidateForm = true;
+	}
+	if ($("#payment").val() === "select_method") {
+		$("fieldset:last legend").css("color", "red");
+		invalidateForm = true;
+	}
+	if ($("#payment").val() === "credit card") {
+		if(!validCreditCard($("#cc-num").val()) || $("#cc-num").val() === "") {
+			$("#credit-card label[for='cc-num']").css("color", "red");
+			invalidateForm = true;
+		}
+		if (!ccvAndZipEntered()) {
+			$("#credit-card label[for='zip']").css("color", "red");
+			$("#credit-card label[for='cvv']").css("color", "red");
+			invalidateForm = true;
+		}
+	}
+	if (invalidateForm) {
+		event.preventDefault();
+	}
 }
 
-function validateEmail() {
-  //validate email:
-  let EmailVal = $('#mail').val();
-  const testEmail = /^[A-Z0-9._%+-]+@([A-Z0-9-]+\.)+[A-Z]{2,4}$/i;
-  if (testEmail.test(EmailVal) || ($('#mail').val().length !== 0)) { //if is email and not empty
-    console.log('email passed');
-    $('.emailErrorMessage').hide();
-  } else {
-    console.log('email failed');
-    $('.emailErrorMessage').show();
-
-  } //end email validation
+// function which checks if a name has been entered
+function nameEntered() {
+	return ($("#name").val() !== "") ? true : false;
 }
 
-let priceErrorCount = 0;
-function validatePrice() {
-  //if total value is 0 no activity has been checked
-  const CheckPrice = Number($('#price').text());
-  console.log(CheckPrice);
-  const errorMessageActivities = '<span style="color: red" class="errorMessageActivities">Please select activity</span>';
-  if (CheckPrice === 0) {
-    priceErrorCount++;
-    if (priceErrorCount <= 1) {
-      $(errorMessageActivities).insertAfter($('.activities'));
-    }
-  } else {
-    $('.errorMessageActivities').hide();
-  }
+// function which checks the validity of the email address
+function validEmailAddress() {
+	var validEmail = new RegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);
+	return validEmail.test($("#mail").val());
 }
 
-function validateCreditCard() {
-  $('.errorMessageCreditCard').remove();
-  if ($('#payment').val() === 'credit card') { //if creditcard is selected
-    console.log('cc selected');
-    if (!($('#cc-num').val().length <= 16 && $('#cc-num').val().length >= 13)) { //must be between 13 and 16 chars and numbers only #TODO: Numbers only
-      console.log('cc-number can not be empty and must be between 13 and 16 letters');
-      const errorMessageCreditCard = '<span style="color: red" class="errorMessageCreditCard">cc-number can not be empty and must be between 13 and 16 letters</span>';
-      $(errorMessageCreditCard).insertAfter($('#cc-num'));
-    }
-    if (!$('#cc-num').val().match(/^\d[\d\s]+\d$/)) { //if its not a number
-      console.log('not valid cc number');
-      const errorMessageCreditCard = '<span style="color: red" class="errorMessageCreditCard">not a valid number</span>';
-      $(errorMessageCreditCard).insertAfter($('#cc-num'));
-    }
-  }
-} //End validateCreditCard
-
-
-function validateZip() {
-  $('.errorMessageZip').remove();
-  if ($('#payment').val() === 'credit card') { //if creditcard is selected
-    if (!($('#zip').val().length === 5) && $('#zip').val().match(/^\d[\d\s]+\d$/)) { //must be 5 chars and numbers only #TODO: Numbers only
-      console.log('zip must be 5 numbers');
-      const errorMessageZIP = '<span style="color: red" class="errorMessageZip">zip must be 5 numbers</span>';
-      $(errorMessageZIP).insertAfter($('#zip'));
-    }
-
-    if (!$('#zip').val().match(/^\d[\d\s]+\d$/)) { //if its not a number
-      console.log('not valid cc number');
-      const errorMessageZIP = '<span style="color: red" class="errorMessageZip">not a valid number</span>';
-      $(errorMessageZIP).insertAfter($('#zip'));
-    }
-  }
-} //End validateCreditCard
-
-function validateCVV(){
-  if ($('#payment').val() === 'credit card') { //if creditcard is selected
-    $('.errorMessageCVV').remove();
-    if (!($('#cvv').val().length === 3)) { //must be 3 chars and numbers only #TODO: Numbers only
-        const errorMessageCVV = '<span style="color: red" class="errorMessageCVV">cvv must be 3 numbers</span>'
-        $(errorMessageCVV).insertAfter($('#cvv'));
-    }
-
-    if (!$('#cvv').val().match(/^\d[\d\s]+\d$/)) { //if its not a number
-      console.log('not valid number');
-      const errorMessageZIP = '<span style="color: red" class="errorMessageZip">not a valid number</span>';
-      $(errorMessageZIP).insertAfter($('#cvv'));
-    }
-  }
+// function which checks to see if a tee-shirt has been selected .
+function teeShirtSelected() {
+		return (!($("#design").val() == "Select Theme")) ? true : false;
 }
 
-//call all the function in master function
-function validateForm() {
-  validateName();
-  validateEmail();
-  validatePrice();
-  validateCreditCard();
-  validateZip();
-  validateCVV();
-} //end form validation
-
-
-
-//validate on keyUp for email
-// on focus show the error messages
-$("#mail").focus(function() {
-  $('.emailErrorMessage').show();
-});
-
-$("#mail").keyup(function() {
-  ValidateEmailInput();
-});
-
-function ValidateEmailInput() {
-  console.log('validating...');
-  let EmailVal = $('#mail').val();
-  const testEmail = /^[A-Z0-9._%+-]+@([A-Z0-9-]+\.)+[A-Z]{2,4}$/i; //regex for email
-  if (testEmail.test(EmailVal)) {
-    console.log('email passed');
-    $('.emailErrorMessage').hide(); //hide the message when passed
-  }
+// function which determines if an activity has been selected by user
+function activitySelected() {
+	var selectedActivityCount = 0;
+	$.each($("input[type='checkbox']"), function() {
+		if ($(this).prop("checked")) {
+			selectedActivityCount += 1;
+		}
+	});
+	return (selectedActivityCount > 0) ? true : false;
 }
 
-$("form").on("submit", function(event) {
-  event.preventDefault();
-  validateForm();
-});
+// function which determins if a zip code and 3 digit ccv number has been selected
+// I didn't validate these, I could but it's time to move on to the next project, and it's an unrequested feature.
+function ccvAndZipEntered() {
+	var zipVal = /^\d{5}$|^\d{5}-\d{4}$/;
+	var cvvVal = /^\d{3}$/;
+	return zipVal.test($("#zip").val()) && cvvVal.test($("#cvv").val());
+}
+
+// functioin which checks the validity of the credit card number entered
+// pulled this from DiegoSalazar on github. I don't need to reinvent the wheel
+function validCreditCard(value) {
+  // accept only digits, dashes or spaces
+	if (/[^0-9-\s]+/.test(value)) return false;
+	// The Luhn Algorithm.
+	var nCheck = 0, nDigit = 0, bEven = false;
+	value = value.replace(/\D/g, "");
+	for (var n = value.length - 1; n >= 0; n--) {
+		var cDigit = value.charAt(n),
+			  nDigit = parseInt(cDigit, 10);
+		if (bEven) {
+			if ((nDigit *= 2) > 9) nDigit -= 9;
+		}
+		nCheck += nDigit;
+		bEven = !bEven;
+	}
+	return (nCheck % 10) === 0;
+}
+
+// function which resets the form colors on submission, so they are black if corrected
+function resetFormColors() {
+	$(".shirt legend p").remove();
+	$("label[for='name']").text("Name:").css("color", "black");
+	$("label[for='mail']").text("Email:").css("color", "black");
+	$(".activities legend").css("color", "black");
+	$("fieldset:last legend").css("color", "black");
+	$("#credit-card label[for='cc-num']").css("color", "black");
+	$("#credit-card label[for='zip']").css("color", "black");
+	$("#credit-card label[for='cvv']").css("color", "black");
+}
+
+// this is the section which hides the payment infomation which is not selected.
+function hideParagraphs() {
+	return $("fieldset:last div p").addClass("is-hidden");
+}
+
+function hideColorOptions() {
+	return $("#colors-js-puns").addClass("is-hidden");
+}
+
+function displayColorOptions() {
+	return $("#colors-js-puns").removeClass("is-hidden");
+}
