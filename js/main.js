@@ -135,107 +135,172 @@ $("#payment").change(function(){
 	}
 });
 
-// button mousedown function which checks validation
-$("button").click(function(event) {
-	isFormValid(event);
+// Form cannot be submiited until the following requirements have been met:
+//	1. Name field isn't blank
+//	2. Email field contains validly formatted email address
+//	3. At least one checkbox under "register for Activities" section must be selected
+//	4. If "Credit Card" is the selected payment option, the three fields accept only numbers, a 16-digit credit card number, a 5-digit zip code,
+//     and a 3-digit CVV
+
+function is_name_field_blank() {
+	if ($("#name").val() === "") {
+		return true
+	} else {
+		return false
+	}
+}
+
+function is_email_format_valid() {
+	var valid_email_regex = /.+@.+\..+/
+	return valid_email_regex.test($("#mail").val());
+}
+
+function is_an_activity_selected() {
+	if ($(".activities input[type='checkbox']").is(":checked") || !$(".activities input.none[name='first']").is(":checked") || !$(".activities input.none[name='second']").is(":checked")) {
+		$(".activity-error").hide();
+		return true;
+	} else {
+		$(".activity-error").show();
+		return false;
+	}
+}
+
+function is_cc_a_number() {
+	var cc_regex = /^\d{16}$/
+	return cc_regex.test($("#cc-num").val())
+}
+
+function is_zip_a_number() {
+	var zip_regex = /^\d{5}$/
+	return zip_regex.test($("#zip").val())
+}
+
+function is_cvv_a_number() {
+	var cvv_regex = /^\d{3}$/
+	return cvv_regex.test($("#cvv").val())
+}
+
+function basic_info_entered() {
+	if (is_an_activity_selected() && is_email_format_valid() && !is_name_field_blank()) {  // these conditions are checked left to right -- their order needs to be
+		return true;																		 // reversed from the order a user typically works through the form
+	} else {
+
+		return false;  //more basic info is required
+	};
+}
+
+function cc_info_copacetic() {
+	if ($("#payment").prop("value") === "credit card") {
+		if (is_cc_a_number() && is_zip_a_number() && is_cvv_a_number()) {
+			return true				//cc info is good
+		} else {
+			return false		//something wrong with cc info
+		};
+	} else if (($("#payment").val() === "paypal") || ($("#payment").val() === "bitcoin")) {
+		return true				// no cc info needed
+	} else {
+		 						// default "select payment method" is selected, so do nothing
+	}
+}
+
+function determine_enabled() {
+	if (basic_info_entered() && cc_info_copacetic()) {
+		$("#register_btn").prop("disabled", false)
+	} else {
+		$("#register_btn").prop("disabled", true)
+	}
+}
+
+
+// by default the register button is diabled, and the email-format error is hidden
+
+$("#register_btn").prop("disabled", true);
+$("#format-error").hide();
+
+// every time one of the form elements changes, the register button may need to be enabled
+// also, validation error messages are displayed where appropriate
+
+$("#name").on("input", function () {
+
+	if ($("#name").val() === "") {
+		$("#name").next().show()
+	} else {
+		$("#name").next().hide()
+	}
+
+	determine_enabled()
 });
 
-// checks the validity of the form
-function isFormValid(event) {
-	resetFormColors();
-	var invalidateForm = false;
-	if (!nameEntered()) {
-		$("label[for='name']").text("Name: (Please provide your name)").css("color", "red");
-		invalidateForm = true;
-	}
-	if (!validEmailAddress()) {
-		$("label[for='mail']").text("Email: (Please provide a valid email address)").css("color", "red");
-		invalidateForm = true;
-	}
-	if (!activitySelected()) {
-		$(".activities legend").css("color", "red");
-		invalidateForm = true;
-	}
-	if (!teeShirtSelected()) {
-		console.log("invalide tee-shirt");
-		console.log($("#design").val());
-		$(".shirt legend").append("<p>Don't forget to pick a T-Shirt</p>");
-		$(".shirt legend p").css("color", "red");
-		invalidateForm = true;
-	}
-	if ($("#payment").val() === "select_method") {
-		$("fieldset:last legend").css("color", "red");
-		invalidateForm = true;
-	}
-	if ($("#payment").val() === "credit card") {
-		if(!validCreditCard($("#cc-num").val()) || $("#cc-num").val() === "") {
-			$("#credit-card label[for='cc-num']").css("color", "red");
-			invalidateForm = true;
-		}
-		if (!ccvAndZipEntered()) {
-			$("#credit-card label[for='zip']").css("color", "red");
-			$("#credit-card label[for='cvv']").css("color", "red");
-			invalidateForm = true;
-		}
-	}
-	if (invalidateForm) {
-		event.preventDefault();
-	}
-}
+$("#mail").on("input", function () {
 
-// function which checks if a name has been entered
-function nameEntered() {
-	return ($("#name").val() !== "") ? true : false;
-}
-
-// function which checks the validity of the email address
-function validEmailAddress() {
-	var validEmail = new RegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);
-	return validEmail.test($("#mail").val());
-}
-
-// function which checks to see if a t-shirt has been selected .
-function tShirtSelected() {
-		return (!($("#design").val() == "Select Theme")) ? true : false;
-}
-
-// function which determines if an activity has been selected by user
-function activitySelected() {
-	var selectedActivityCount = 0;
-	$.each($("input[type='checkbox']"), function() {
-		if ($(this).prop("checked")) {
-			selectedActivityCount += 1;
-		}
-	});
-	return (selectedActivityCount > 0) ? true : false;
-}
-
-// function which determins if a zip code and 3 digit ccv number has been selected
-function ccvAndZipEntered() {
-	var zipVal = /^\d{5}$|^\d{5}-\d{4}$/;
-	var cvvVal = /^\d{3}$/;
-	return zipVal.test($("#zip").val()) && cvvVal.test($("#cvv").val());
-}
-
-// functioin which checks the validity of the credit card number entered
-function validCreditCard(value) {
-  // accept only digits, dashes or spaces
-	if (/[^0-9-\s]+/.test(value)) return false;
-	// The Luhn Algorithm.
-	var nCheck = 0, nDigit = 0, bEven = false;
-	value = value.replace(/\D/g, "");
-	for (var n = value.length - 1; n >= 0; n--) {
-		var cDigit = value.charAt(n),
-			  nDigit = parseInt(cDigit, 10);
-		if (bEven) {
-			if ((nDigit *= 2) > 9) nDigit -= 9;
-		}
-		nCheck += nDigit;
-		bEven = !bEven;
+	if (/.+@.+\..+/.test($("#mail").val())) {
+		$("#format-error").hide();
+	} else {
+		$("#format-error").show();
 	}
-	return (nCheck % 10) === 0;
-}
 
+	if ($("#mail").val() === "") {
+		$("#format-error").hide();
+		$("#empty-error").show();
+	} else {
+		$("#empty-error").hide()
+
+	}
+
+	determine_enabled()
+});
+
+$(".activities input[type='checkbox']").on("change", function () {
+	determine_enabled()
+});
+
+$(".activities input[name='first']").on("change", function () {
+	determine_enabled()
+})
+
+$(".activities input[name='second']").on("change", function () {
+	determine_enabled()
+})
+
+$("#payment").on("change", function () {
+	determine_enabled()
+})
+
+
+$("#cc-num").on("change", function () {
+
+	if (/^\d{16}$/.test($("#cc-num").val())) {
+		$("#cc-num").next().hide();
+	} else {
+		$("#cc-num").next().show();
+	}
+
+	determine_enabled()
+})
+
+
+$("#zip").on("change", function () {
+
+	if (/^\d{5}$/.test($("#zip").val())) {
+		$("#zip").next().hide();
+	} else {
+		$("#zip").next().show();
+	}
+
+	determine_enabled()
+})
+
+
+$("#cvv").on("change", function () {
+
+	if (/^\d{3}$/.test($("#cvv").val())) {
+		$("#cvv").next().hide();
+	} else {
+		$("#cvv").next().show();
+	};
+
+	determine_enabled()
+})
 // resets the form colors on submission, so they are black if corrected
 function resetFormColors() {
 	$(".shirt legend p").remove();
