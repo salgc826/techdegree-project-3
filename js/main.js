@@ -239,6 +239,15 @@ function validCreditCard(value) {
 	return (nCheck % 10) === 0;
 }
 
+function empty() {
+    var x;
+    x = document.getElementById("roll-input").value;
+    if (x == "") {
+        alert("Enter a Valid Roll Number");
+        return false;
+    };
+}
+
 // function which resets the form colors on submission, so they are black if corrected
 function resetFormColors() {
 	$(".shirt legend p").remove();
