@@ -1,278 +1,422 @@
-// Set focus on the first text field
-$( document ).ready( function(){
-  $("#name").focus();
-  hideParagraphs();
-  hideColorOptions();
+// when other is selected, a box to input other job is shown
+document.addEventListener('DOMContentLoaded', function() {
+    function onJobChange(event) {
+        if (event.target.value === 'other') {
+            otherField.style.display = 'block';
+            otherFieldLabel.style.display = 'block';
+        } else {
+            otherField.style.display = 'none';
+            otherFieldLabel.style.display = 'none';
+        }
+    }
+    document.querySelector('select[name="user_title"]').addEventListener('change', onJobChange);
+
+    var otherField = document.getElementById('other-title');
+    var otherFieldLabel = document.getElementById('other-title-label');
+
+    otherFieldLabel.style.display = 'none';
+    otherField.style.display = 'none';
+
+    // hide the color drop down menu and label
+    var colorSelect = document.getElementById("color");
+    var colorLabel = document.getElementById("color-label");
+    colorSelect.style.display = "none";
+    colorLabel.style.display = "none";
+
+    // T-shirt color options are revealed based on the design selected.
+    // grab and group all of the design options
+    var designsOptions = {
+        selectdesign: [document.getElementById('selecttheme')],
+        'js puns': [
+            document.getElementById('cornflowerblue'),
+            document.getElementById('darkslategrey'),
+            document.getElementById('gold')
+        ],
+        'heart js': [
+            document.getElementById('tomato'),
+            document.getElementById('steelblue'),
+            document.getElementById('dimgrey')
+        ]
+    };
+    function onDesignChange(event) {
+
+        if (event.target.value === 'selectdesign') {
+            colorSelect.style.display = "none";
+            colorLabel.style.display = "none";
+            return
+        } else {
+            colorSelect.style.display = "block";
+            colorLabel.style.display = "block";
+        }
+        // Hide all options
+        designsOptions['selectdesign']
+            .concat(designsOptions['js puns'])
+            .concat(designsOptions['heart js'])
+            .forEach(function(optionElement) {
+                if (optionElement.parentElement) {
+                    optionElement.parentElement.removeChild(optionElement);
+                }
+            });
+
+        // Add the options back in that match the current selection
+        var select = document.getElementById('color');
+        designsOptions[event.target.value].forEach(function(optionElement) {
+            select.appendChild(optionElement);
+        });
+
+        // Select the first option
+        select.options[0].selected = 'selected';
+    }
+    // Select the first option
+    onDesignChange({ target: { value: 'selectdesign' } });
+    document.querySelector('select[name="user_design"]').addEventListener('change', onDesignChange);
+
+    // When we choose a payment option, the chosen payment section is revealed and the other payment sections are hidden
+    function hidePaymentFields() {
+        document.getElementById('credit-card').style.display = 'none';
+        document.getElementById('bitcoin-div').style.display = 'none';
+        document.getElementById('paypal-div').style.display = 'none';
+    }
+
+    // Hide bitcoin and paypal divs intially
+    function hideBitCoinPaypal() {
+        document.getElementById('bitcoin-div').style.display = 'none';
+        document.getElementById('paypal-div').style.display = 'none';
+    }
+    hideBitCoinPaypal();
+
+    // strips anything that's not a number out of a text field
+    function numbersOnly(event) {
+        event.target.value = event.target.value.replace(/[^0-9]+/, '');
+    };
+
+    document.getElementById('cc-num').addEventListener('keyup', numbersOnly);
+    document.getElementById('zip').addEventListener('keyup', numbersOnly);
+    document.getElementById('cvv').addEventListener('keyup', numbersOnly);
+
+    function changePaymentHandler(event) {
+        hidePaymentFields();
+        var ccreq = document.getElementById('cc-num');
+        var cczip = document.getElementById('zip');
+        var cccvv = document.getElementById('cvv');
+
+        if (event.target.value === 'credit card') {
+            removeSelectPaymentError();
+            document.getElementById('credit-card').style.display = 'block';
+
+            ccreq.setAttribute('type', 'tel');
+            ccreq.setAttribute('minlength', 13);
+            ccreq.setAttribute('maxlength', 16);
+
+            cczip.setAttribute('type', 'number');
+            cczip.setAttribute('min', 10000);
+            cczip.setAttribute('max', 99999);
+
+            cccvv.setAttribute('type', 'number');
+            cccvv.setAttribute('min', 100);
+            cccvv.setAttribute('max', 999);
+        } else if (event.target.value === 'bitcoin') {
+            removeSelectPaymentError();
+            document.getElementById('bitcoin-div').style.display = 'block';
+        } else if (event.target.value === 'paypal') {
+            removeSelectPaymentError();
+            document.getElementById('paypal-div').style.display = 'block';
+        }
+    }
+    document.querySelector('select[name="user_payment"]').addEventListener('change', changePaymentHandler);
+
+    // Remove the select payment error
+    function removeSelectPaymentError() {
+        if (npsError.parentElement !== null) {
+            if (npsError.parentElement) {
+                paymentFieldset.removeChild(npsError);
+            }
+        }
+    }
+    // User cannot select two activities that are at the same time
+    var jsf = document.getElementById('jsframeworks');
+    var express = document.getElementById('express');
+    var node = document.getElementById('node');
+    var jslib = document.getElementById('jslib');
+    var mainconf = document.getElementById('mainconf');
+    var buildtools = document.getElementById('buildtools');
+    var npmw = document.getElementById('npmw');
+
+    var checkboxes = document.getElementsByName('checkbox');
+
+    function enableButtonDisplayTotal() {
+        submitButton.removeAttribute('disabled');
+        displayTotal();
+        validateActivity();
+    }
+
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].addEventListener('change', function(e) {
+            var data = { data: e.target.dataset, checked: e.target.checked };
+            enableButtonDisplayTotal(data);
+        });
+    }
+
+    //both on Tuesday 9am-12pm
+    jsf.addEventListener('change', function(event) {
+        express.disabled = event.target.checked;
+        express.parentElement.style.setProperty("text-decoration", event.target.checked ? "line-through" : "");
+        enableButtonDisplayTotal();
+    });
+
+    express.addEventListener('change', function(event) {
+        jsf.disabled = event.target.checked;
+        jsf.parentElement.style.setProperty("text-decoration", event.target.checked ? "line-through" : "");
+        enableButtonDisplayTotal();
+    });
+
+    // both on Tuesday 1pm-4pm
+    node.addEventListener('change', function(event) {
+        jslib.disabled = event.target.checked;
+        jslib.parentElement.style.setProperty("text-decoration", event.target.checked ? "line-through" : "");
+        enableButtonDisplayTotal();
+    });
+
+    jslib.addEventListener('change', function(event) {
+        node.disabled = event.target.checked;
+        node.parentElement.style.setProperty("text-decoration", event.target.checked ? "line-through" : "");
+        enableButtonDisplayTotal();
+    });
+
+    // event listener for submit button
+    var selectActivity = document.createElement('label');
+    var activitiesTotal = document.createElement('total-cost');
+    var activitiesFieldset = document.getElementsByTagName('fieldset')[2];
+
+    var theForm = document.querySelector('form');
+
+    theForm.addEventListener('submit', function(event) {
+        if (!checkName() || !checkMail() || !validateActivity() || !checkPaymentMethod()) {
+            event.stopPropagation();
+            event.preventDefault();
+        };
+    });
+
+    var submitButton = document.querySelector('button[type="submit"]');
+
+    // Check in real time that the user entered a name at all and is longer than two characters
+    var nameInput = document.getElementById('name');
+    var nameLabel = document.getElementsByTagName('label')[0];
+    var nameError = document.createElement('label');
+
+    function checkName(event) {
+        if (nameInput.value === '' || nameInput === null) {
+            window.scrollTo(0, nameInput.parentElement.offsetTop);
+            nameInput.setCustomValidity("Please enter a name");
+            nameError.textContent = 'Please enter a name';
+            nameError.setAttribute('class', 'error');
+            nameLabel.appendChild(nameError);
+            return false
+        } else if (nameInput.value.length < 2) {
+            nameInput.setCustomValidity("Please enter a name longer than two characters");
+            nameError.textContent = 'Please enter a name longer than two characters';
+            nameError.setAttribute('class', 'error');
+            nameLabel.appendChild(nameError);
+            window.scrollTo(0, nameInput.parentElement.offsetTop);
+            return false
+        } else if (nameError.parentElement !== null) {
+            nameInput.setCustomValidity("");
+            nameLabel.removeChild(nameError);
+        }
+        return true
+    };
+    nameInput.addEventListener("input", checkName);
+
+
+    // Check that the user entered anything in the email field
+    var mail = document.getElementById('mail');
+    var mailLabel = document.getElementsByTagName('label')[1];
+    var mailError = document.createElement('label');
+    var emailPattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
+
+    function checkMail(event) {
+        if (mail.value === '' || mail.value === null) {
+            mail.setCustomValidity("Please enter an email address");
+            mailError.textContent = 'Please enter an email address';
+            mailError.setAttribute('class', 'error');
+            mailLabel.appendChild(mailError);
+            window.scrollTo(0, mail.parentElement.offsetTop);
+            return false
+        } else if (!mail.value.match(emailPattern)) {
+            mail.setCustomValidity("Please enter a valid email address");
+            mailError.textContent = 'Please enter a valid email address';
+            mailError.setAttribute('class', 'error');
+            mailLabel.appendChild(mailError);
+            window.scrollTo(0, mail.parentElement.offsetTop);
+            return false
+        } else if (mailError.parentElement !== null) {
+            mail.setCustomValidity("");
+            if (mailError.parentElement) {
+                mailError.parentElement.removeChild(mailError);
+            }
+        }
+        return true
+    }
+    mail.addEventListener("input", checkMail);
+
+    // display total price of activities selected
+    function displayTotal(data) {
+        var price = [].slice.call(document.querySelectorAll('[data-price]')).reduce(function(total, checkbox) {
+            return checkbox.checked ? total + parseInt(checkbox.dataset.price, 10) : total;
+        }, 0);
+        activitiesTotal.textContent = 'Your total is $' + price;
+        activitiesFieldset.appendChild(activitiesTotal);
+    }
+    displayTotal();
+
+    // Error message for when no activity is selected
+    function activitiesError() {
+        selectActivity.textContent = 'Please select an activity';
+        selectActivity.setAttribute('class', 'error');
+        activitiesFieldset.appendChild(selectActivity);
+        window.scrollTo(0, activitiesFieldset.offsetTop);
+    }
+
+    // Check that the user has ticked an activity checkbox, if not, submit button is disabled
+    function validateActivity() {
+        var activitySelected =
+            jsf.checked ||
+            express.checked ||
+            node.checked ||
+            jslib.checked ||
+            mainconf.checked ||
+            buildtools.checked ||
+            npmw.checked;
+
+        // If at least one activity is selected
+        if (activitySelected) {
+            // remove error label if it exists
+            if (selectActivity.parentElement) {
+                selectActivity.parentElement.removeChild(selectActivity);
+            }
+        } else {
+            submitButton.setAttribute('disabled', '');
+            activitiesError();
+            return false;
+        }
+        return true;
+    }
+
+    //Check that the user entered anything in the CVV field
+    function checkCvv() {
+        if (cvvfield.value === '' || cvvfield.value === null) {
+            cvvfield.setCustomValidity("Please enter a CVV number");
+            cvvError.textContent = 'Please enter a CVV number';
+            cvvError.setAttribute('class', 'error');
+            cvvClass.appendChild(cvvError);
+            return false;
+        } else if (cvvfield.value.length < 3) {
+            cvvfield.setCustomValidity("Please enter a 3 digit CVV number");
+            cvvError.textContent = 'Please enter a 3 digit CVV number';
+            cvvError.setAttribute('class', 'error');
+            cvvClass.appendChild(cvvError);
+            return false;
+        } else if (cvvfield.value.length > 3) {
+            cvvfield.setCustomValidity("Please enter only 3 digits");
+            cvvError.textContent = 'Please enter only 3 digits';
+            cvvError.setAttribute('class', 'error');
+            cvvClass.appendChild(cvvError);
+            return false;
+        } else if (cvvError.parentElement !== null) {
+            cvvfield.setCustomValidity("");
+            cvvClass.removeChild(cvvError);
+        }
+        return true;
+    }
+    var cvvfield = document.getElementById('cvv');
+    var cvvClass = cvvfield.parentElement;
+    var cvvError = document.createElement('label');
+    cvvfield.addEventListener('keyup', checkCvv, false);
+
+    //Check that the user entered anything in the zip field
+    function checkZip() {
+        if (zipfield.value === '' || zipfield.value === null) {
+            zipfield.setCustomValidity("Please enter a valid 5 digit zip code");
+            zipError.textContent = 'Please enter a valid 5 digit zip code';
+            zipError.setAttribute('class', 'error');
+            zipClass.appendChild(zipError);
+            return false;
+        } else if (zipfield.value.length < 5) {
+            zipfield.setCustomValidity("Please enter a zip code that is at least 5 digits long");
+            zipError.textContent = 'Please enter a zip code that is at least 5 digits long';
+            zipError.setAttribute('class', 'error');
+            zipClass.appendChild(zipError);
+            return false;
+        } else if (zipfield.value.length > 5) {
+            zipfield.setCustomValidity("Please enter a zip code that is no more than 5 digits long");
+            zipError.textContent = 'Please enter a zip code that is no more than 5 digits long';
+            zipError.setAttribute('class', 'error');
+            zipClass.appendChild(zipError);
+            return false;
+        } else if (zipError.parentElement !== null) {
+            zipfield.setCustomValidity("");
+            zipClass.removeChild(zipError);
+        }
+        return true;
+    }
+    var zipfield = document.getElementById('zip');
+    var zipClass = zipfield.parentElement;
+    var zipError = document.createElement('label');
+    zipfield.addEventListener('keyup', checkZip, false);
+
+    //Check that the user entered anything in the credit card field
+    function checkCC() {
+        if (ccfield.value === '' || ccfield.value === null) {
+            ccfield.setCustomValidity("Please enter a valid Credit Card number.");
+            ccError.textContent = 'Please enter a valid Credit Card number.';
+            ccError.setAttribute('class', 'error');
+            ccClass.appendChild(ccError);
+            return false;
+        } else if (ccfield.value.length < 13) {
+            ccfield.setCustomValidity("Please enter a number that is at least 13 digits long.");
+            ccError.textContent = 'Please enter a number that is at least 13 digits long.';
+            ccError.setAttribute('class', 'error');
+            ccClass.appendChild(ccError);
+            return false;
+        } else if (ccfield.value.length > 16) {
+            ccfield.setCustomValidity("Please enter a number that is no more than 16 digits long.");
+            ccError.textContent = 'Please enter a number that is no more than 16 digits long.';
+            ccError.setAttribute('class', 'error');
+            ccClass.appendChild(ccError);
+            return false;
+        } else if (ccError.parentElement !== null) {
+            ccfield.setCustomValidity("");
+            ccClass.removeChild(ccError);
+        }
+        return true;
+    }
+    var ccfield = document.getElementById('cc-num');
+    var ccClass = ccfield.parentElement;
+    var ccError = document.createElement('label');
+    ccfield.addEventListener('keyup', checkCC, false);
+
+    // Check that the user selected a payment method
+    function checkPaymentMethod() {
+        if (paymentSelector.value === "select_method") {
+            npsError.textContent = "Please select a payment method";
+            npsError.setAttribute('class', 'error');
+            paymentFieldset.appendChild(npsError);
+            return false;
+        } else if (paymentSelector.value === "credit card") {
+            return checkCC() && checkZip() && checkCvv();
+        }
+        return true;
+    }
+
+    var paymentSelector = document.getElementById('payment');
+
+    paymentSelector.addEventListener('change', function () {
+        ccfield.setCustomValidity("");
+        zipfield.setCustomValidity("");
+        cvvfield.setCustomValidity("");
+    });
+
+    var paymentFieldset = document.getElementsByTagName('fieldset')[3];
+    var npsError = document.createElement('label');
+    var selectID = document.getElementsByName('user_payment');
 });
-
-// Job Role section of the form. Reveal a text field when the "Other" option is selected from the "Job Role" drop down menu
-var addJobTitleField = function() {
-	$("fieldset:first").append("<input type='text' id='other-title' placeholder='Your Title'>");
-};
-
-// T-Shirt Info section of the form. For the T-Shirt color menu
-var arrayOfColors = $.makeArray($("#color").children());
-
-// function which removes all the color options
-var removeAllColorOptions = function() {
-	$("#color").children().remove();
-};
-
-// adds the event listener
-$("#title").change(function(){
-	if ($("#title").val() === "other"){
-		addJobTitleField();
-	} else {
-		$("#other-title").remove();
-	}
-});
-
-// this section changes the design color drop down menu
-$("#design").change(function() {
-	if ($("#design").val() === "Select Theme") {
-	hideColorOptions();
-} else {
-	displayColorOptions();
-	removeAllColorOptions();
-	var jsPuns = "(JS Puns shirt only)";
-	var hearJS = "(I";
-	switch( $("#design").val() ) {
-		case "js puns":
-			arrayOfColors.forEach(function(colorChoice){
-				var colorOption = colorChoice.innerHTML;
-				if (colorOption.indexOf(jsPuns) !== -1) {
-					$("#color").append(colorChoice);
-				}
-				$("#color")[0].selectedIndex = 0;
-			});
-
-			break;
-		case "heart js":
-			arrayOfColors.forEach(function(colorChoice){
-				var colorOption = colorChoice.innerHTML;
-				if (colorOption.indexOf(hearJS) !== -1) {
-					$("#color").append(colorChoice);
-				}
-				$("#color")[0].selectedIndex = 0;
-			});
-			break;
-		case "Select Theme":
-				arrayOfColors.forEach(function(colorChoice){
-					$("#color").append(colorChoice);
-			});
-				$("#color")[0].selectedIndex = 0;
-	}
-}
-});
-
-var totalCost = 0;
-// this updates the total cost of the boxes selected
-$('[type=checkbox]').change(function(){
-	if ( $(this)['0'].checked && $(this)['0'].name === "all"){
-		totalCost += 200;
-	} else if (!($(this)['0'].checked) && $(this)['0'].name === "all") {
-		totalCost -= 200;
-	} else if ($(this)['0'].checked) {
-		totalCost += 100;
-	} else {
-		totalCost -= 100;
-	}
-	var htmlString = "<p id='total'> Total $" + totalCost + "</p>";
-	createTotal(htmlString, totalCost);
-});
-
-// function which creates the total at the bottom of the selections
-var createTotal = function(htmlString, totalCost) {
-	$("#total").remove();
-	if (totalCost !== 0) {
-		$(".activities").append($(htmlString));
-	}
-};
-
-// this is the section where I disable activities that are scheduled at the same time.
-var arrayOfActivities = $.makeArray($('.activities label'));
-
-$('[type=checkbox]').change(function(){
-	// don't like this so much, but it works
-	if ($(this)['0'].name === 'js-libs' && $(this)['0'].checked) {
-		arrayOfActivities[4].children['0'].disabled = true;
-	} else if ($(this)['0'].name === 'js-libs' && !$(this)['0'].checked) {
-		arrayOfActivities[4].children['0'].disabled = false;
-
-	} else if ($(this)['0'].name === 'node' && $(this)['0'].checked) {
-		arrayOfActivities[2].children['0'].disabled = true;
-	} else if ($(this)['0'].name === 'node' && !$(this)['0'].checked) {
-		arrayOfActivities[2].children['0'].disabled = false;
-
-	} else if ($(this)['0'].name === 'js-frameworks' && $(this)['0'].checked) {
-		arrayOfActivities[3].children['0'].disabled = true;
-	} else if ($(this)['0'].name === 'js-frameworks' && !$(this)['0'].checked) {
-		arrayOfActivities[3].children['0'].disabled = false;
-
-	} else if ($(this)['0'].name === 'express' && $(this)['0'].checked) {
-		arrayOfActivities[1].children['0'].disabled = true;
-	} else if ($(this)['0'].name === 'express' && !$(this)['0'].checked) {
-		arrayOfActivities[1].children['0'].disabled = false;
-	}
-
-});
-
-//changes what is displayed based on the payment option selected
-$("#payment").change(function(){
-	if ($(this).val() === "credit card") {
-		hideParagraphs();
-		$("#credit-card").removeClass("is-hidden");
-	} else if ($(this).val() === "paypal") {
-		$("#credit-card").addClass("is-hidden");
-		$("fieldset:last div p")['0'].classList = "";
-		$("fieldset:last div p")['1'].classList = "is-hidden";
-	} else if ($(this).val() === "bitcoin") {
-		$("#credit-card").addClass("is-hidden");
-		$("fieldset:last div p")['0'].classList = "is-hidden";
-		$("fieldset:last div p")['1'].classList = "";
-	} else if ($(this).val() === "select_method") {
-		$("#credit-card").removeClass("is-hidden");
-	}
-});
-
-
-
-
-
-// function which resets the form colors on submission, so they are black if corrected
-function resetFormColors() {
-	$(".shirt legend p").remove();
-	$("label[for='name']").text("Name:").css("color", "black");
-	$("label[for='mail']").text("Email:").css("color", "black");
-	$(".activities legend").css("color", "black");
-	$("fieldset:last legend").css("color", "black");
-	$("#credit-card label[for='cc-num']").css("color", "black");
-	$("#credit-card label[for='zip']").css("color", "black");
-	$("#credit-card label[for='cvv']").css("color", "black");
-}
-
-// this is the section which hides the payment infomation which is not selected.
-function hideParagraphs() {
-	return $("fieldset:last div p").addClass("is-hidden");
-}
-
-function hideColorOptions() {
-	return $("#colors-js-puns").addClass("is-hidden");
-}
-
-function displayColorOptions() {
-	return $("#colors-js-puns").removeClass("is-hidden");
-}
-// checks the validity of the form
-/*==== FORM VALIDATION ====*/
-
-const mail = document.querySelector('#mail');
-const name = document.querySelector('#name');
-const form = document.getElementsByTagName('form')[0];
-const ccNum = document.querySelector('#cc-num');
-const zip = document.querySelector('#zip');
-const cvv = document.querySelector('#cvv');
-const errorMsg = document.createElement('p');
-errorMsg.id = 'error';
-const zipLabel = document.querySelector('#zipLabel');
-const cvvLabel = document.querySelector('#cvvLabel');
-
-// NAME
-function validateName (event) {
-  if (!name.validity.valid) {
-    event.preventDefault();
-    name.style.setProperty('box-shadow', '0 0 0 1px red');
-    name.previousElementSibling.style.color = 'red';
-  }
-  else {
-    name.style.setProperty('box-shadow', '');
-    name.previousElementSibling.style.color = '';
-  }
-}
-// EMAIL
-function validateEmail(event) {
-  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  if (re.test(mail.value) == false) {
-    event.preventDefault();
-    mail.style.setProperty('box-shadow', '0 0 0 1px red');
-    mail.previousElementSibling.style.color = 'red';
-  }
-  else {
-    mail.style.setProperty('box-shadow', '');
-    mail.previousElementSibling.style.color = '';
-  }
-}
-// ACTIVITIES
-function validateActivities (event) {
-  if (Array.from(activities).filter(el => el.checked).length < 1) {
-    event.preventDefault();
-    document.querySelector('.activities legend').style.color = 'red';
-  }
-  else {
-    document.querySelector('.activities legend').style.color = '';
-  }
-}
-// PAYMENT
-function validatePayment (event) {
-  if (paymentType.value == 'credit card') {
-    if (ccNum.value == '') {
-      event.preventDefault();
-      ccNum.style.setProperty('box-shadow', '0 0 0 1px red');
-      ccNum.previousElementSibling.style.color = 'red';
-      errorMsg.innerText = 'Please enter a credit card number.';
-      ccNum.previousElementSibling.appendChild(errorMsg);
-      zipLabel.classList.add('adjust');
-      cvvLabel.classList.add('adjust');
-      zipLabel.classList.remove('adjustPlus');
-      cvvLabel.classList.remove('adjustPlus');
-    }
-    else if (ccNum.value.length < 13 || ccNum.value.length > 16 || isNaN(ccNum.value)) {
-      event.preventDefault();
-      ccNum.style.setProperty('box-shadow', '0 0 0 1px red');
-      ccNum.previousElementSibling.style.color = 'red';
-      errorMsg.innerText = 'Please enter a number that is between 13 and 16 digits long.';
-      ccNum.previousElementSibling.appendChild(errorMsg);
-      zipLabel.classList.remove('adjust');
-      cvvLabel.classList.remove('adjust');
-      zipLabel.classList.add('adjustPlus');
-      cvvLabel.classList.add('adjustPlus');
-    }
-    else {
-      ccNum.style.setProperty('box-shadow', '');
-      ccNum.previousElementSibling.style.color = '';
-      if (errorMsg) {
-        ccNum.previousElementSibling.removeChild(errorMsg);
-      }
-      zipLabel.classList.remove('adjust');
-      cvvLabel.classList.remove('adjust');
-      zipLabel.classList.remove('adjustPlus');
-      cvvLabel.classList.remove('adjustPlus');
-    }
-    if (!zip.validity.valid) {
-      event.preventDefault();
-      zip.style.setProperty('box-shadow', '0 0 0 1px red');
-      zip.previousElementSibling.style.color = 'red';
-    }
-    else {
-      zip.style.setProperty('box-shadow', '');
-      zip.previousElementSibling.style.color = '';
-    }
-    if (!cvv.validity.valid) {
-      event.preventDefault();
-      cvv.style.setProperty('box-shadow', '0 0 0 1px red');
-      cvv.previousElementSibling.style.color = 'red';
-    }
-    else {
-      cvv.style.setProperty('box-shadow', '');
-      cvv.previousElementSibling.style.color = '';
-    }
-  }
-}
-
-// ALL
-function validate (event) {
-  validateEmail(event);
-  validateActivities(event);
-  validateName(event);
-  validatePayment(event);
-}
