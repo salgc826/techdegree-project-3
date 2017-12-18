@@ -241,7 +241,7 @@ function validCreditCard(value) {
 
 function empty() {
     var x;
-    x = document.getElementById("roll-input").value;
+    x = document.getElementById("activities, credit-card").value;
     if (x == "") {
         alert("Enter a Valid Roll Number");
         return false;
