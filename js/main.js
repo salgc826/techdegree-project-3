@@ -136,6 +136,33 @@ $("#payment").change(function(){
 });
 
 
+
+
+
+// function which resets the form colors on submission, so they are black if corrected
+function resetFormColors() {
+	$(".shirt legend p").remove();
+	$("label[for='name']").text("Name:").css("color", "black");
+	$("label[for='mail']").text("Email:").css("color", "black");
+	$(".activities legend").css("color", "black");
+	$("fieldset:last legend").css("color", "black");
+	$("#credit-card label[for='cc-num']").css("color", "black");
+	$("#credit-card label[for='zip']").css("color", "black");
+	$("#credit-card label[for='cvv']").css("color", "black");
+}
+
+// this is the section which hides the payment infomation which is not selected.
+function hideParagraphs() {
+	return $("fieldset:last div p").addClass("is-hidden");
+}
+
+function hideColorOptions() {
+	return $("#colors-js-puns").addClass("is-hidden");
+}
+
+function displayColorOptions() {
+	return $("#colors-js-puns").removeClass("is-hidden");
+}
 // checks the validity of the form
 /*==== FORM VALIDATION ====*/
 
@@ -248,30 +275,4 @@ function validate (event) {
   validateActivities(event);
   validateName(event);
   validatePayment(event);
-}
-
-
-// function which resets the form colors on submission, so they are black if corrected
-function resetFormColors() {
-	$(".shirt legend p").remove();
-	$("label[for='name']").text("Name:").css("color", "black");
-	$("label[for='mail']").text("Email:").css("color", "black");
-	$(".activities legend").css("color", "black");
-	$("fieldset:last legend").css("color", "black");
-	$("#credit-card label[for='cc-num']").css("color", "black");
-	$("#credit-card label[for='zip']").css("color", "black");
-	$("#credit-card label[for='cvv']").css("color", "black");
-}
-
-// this is the section which hides the payment infomation which is not selected.
-function hideParagraphs() {
-	return $("fieldset:last div p").addClass("is-hidden");
-}
-
-function hideColorOptions() {
-	return $("#colors-js-puns").addClass("is-hidden");
-}
-
-function displayColorOptions() {
-	return $("#colors-js-puns").removeClass("is-hidden");
 }
