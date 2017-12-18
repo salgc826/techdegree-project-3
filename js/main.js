@@ -142,112 +142,126 @@ $("button").click(function(event) {
 });
 
 // checks the validity of the form
-function isFormValid(event) {
-	resetFormColors();
-	var invalidateForm = false;
-	if (!nameEntered()) {
-		$("label[for='name']").text("Name: (Please provide your name)").css("color", "red");
-		invalidateForm = true;
-	}
-	if (!validEmailAddress()) {
-		$("label[for='mail']").text("Email: (Please provide a valid email address)").css("color", "red");
-		invalidateForm = true;
-	}
-	if (!activitySelected()) {
-		$(".activities legend").css("color", "red");
-		invalidateForm = true;
-	}
-	if (!teeShirtSelected()) {
-		console.log("invalide tee-shirt");
-		console.log($("#design").val());
-		$(".shirt legend").append("<p>Don't forget to pick a T-Shirt</p>");
-		$(".shirt legend p").css("color", "red");
-		invalidateForm = true;
-	}
-	if ($("#payment").val() === "select_method") {
-		$("fieldset:last legend").css("color", "red");
-		invalidateForm = true;
-	}
-	if ($("#payment").val() === "credit card") {
-		if(!validCreditCard($("#cc-num").val()) || $("#cc-num").val() === "") {
-			$("#credit-card label[for='cc-num']").css("color", "red");
-			invalidateForm = true;
-		}
-		if (!ccvAndZipEntered()) {
-			$("#credit-card label[for='zip']").css("color", "red");
-			$("#credit-card label[for='cvv']").css("color", "red");
-			invalidateForm = true;
-		}
-	}
-	if (invalidateForm) {
-		event.preventDefault();
-	}
+/*==== FORM VALIDATION ====*/
+
+const mail = document.querySelector('#mail');
+const name = document.querySelector('#name');
+const form = document.getElementsByTagName('form')[0];
+const ccNum = document.querySelector('#cc-num');
+const zip = document.querySelector('#zip');
+const cvv = document.querySelector('#cvv');
+const errorMsg = document.createElement('p');
+errorMsg.id = 'error';
+const zipLabel = document.querySelector('#zipLabel');
+const cvvLabel = document.querySelector('#cvvLabel');
+
+// NAME
+function validateName (event) {
+  if (!name.validity.valid) {
+    event.preventDefault();
+    name.style.setProperty('box-shadow', '0 0 0 1px red');
+    name.previousElementSibling.style.color = 'red';
+  }
+  else {
+    name.style.setProperty('box-shadow', '');
+    name.previousElementSibling.style.color = '';
+  }
+}
+// EMAIL
+function validateEmail(event) {
+  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  if (re.test(mail.value) == false) {
+    event.preventDefault();
+    mail.style.setProperty('box-shadow', '0 0 0 1px red');
+    mail.previousElementSibling.style.color = 'red';
+  }
+  else {
+    mail.style.setProperty('box-shadow', '');
+    mail.previousElementSibling.style.color = '';
+  }
+}
+// ACTIVITIES
+function validateActivities (event) {
+  if (Array.from(activities).filter(el => el.checked).length < 1) {
+    event.preventDefault();
+    document.querySelector('.activities legend').style.color = 'red';
+  }
+  else {
+    document.querySelector('.activities legend').style.color = '';
+  }
+}
+// PAYMENT
+function validatePayment (event) {
+  if (paymentType.value == 'credit card') {
+    if (ccNum.value == '') {
+      event.preventDefault();
+      ccNum.style.setProperty('box-shadow', '0 0 0 1px red');
+      ccNum.previousElementSibling.style.color = 'red';
+      errorMsg.innerText = 'Please enter a credit card number.';
+      ccNum.previousElementSibling.appendChild(errorMsg);
+      zipLabel.classList.add('adjust');
+      cvvLabel.classList.add('adjust');
+      zipLabel.classList.remove('adjustPlus');
+      cvvLabel.classList.remove('adjustPlus');
+    }
+    else if (ccNum.value.length < 13 || ccNum.value.length > 16 || isNaN(ccNum.value)) {
+      event.preventDefault();
+      ccNum.style.setProperty('box-shadow', '0 0 0 1px red');
+      ccNum.previousElementSibling.style.color = 'red';
+      errorMsg.innerText = 'Please enter a number that is between 13 and 16 digits long.';
+      ccNum.previousElementSibling.appendChild(errorMsg);
+      zipLabel.classList.remove('adjust');
+      cvvLabel.classList.remove('adjust');
+      zipLabel.classList.add('adjustPlus');
+      cvvLabel.classList.add('adjustPlus');
+    }
+    else {
+      ccNum.style.setProperty('box-shadow', '');
+      ccNum.previousElementSibling.style.color = '';
+      if (errorMsg) {
+        ccNum.previousElementSibling.removeChild(errorMsg);
+      }
+      zipLabel.classList.remove('adjust');
+      cvvLabel.classList.remove('adjust');
+      zipLabel.classList.remove('adjustPlus');
+      cvvLabel.classList.remove('adjustPlus');
+    }
+    if (!zip.validity.valid) {
+      event.preventDefault();
+      zip.style.setProperty('box-shadow', '0 0 0 1px red');
+      zip.previousElementSibling.style.color = 'red';
+    }
+    else {
+      zip.style.setProperty('box-shadow', '');
+      zip.previousElementSibling.style.color = '';
+    }
+    if (!cvv.validity.valid) {
+      event.preventDefault();
+      cvv.style.setProperty('box-shadow', '0 0 0 1px red');
+      cvv.previousElementSibling.style.color = 'red';
+    }
+    else {
+      cvv.style.setProperty('box-shadow', '');
+      cvv.previousElementSibling.style.color = '';
+    }
+  }
 }
 
-// function which checks if a name has been entered
-function nameEntered() {
-	return ($("#name").val() !== "") ? true : false;
+// ALL
+function validate (event) {
+  validateEmail(event);
+  validateActivities(event);
+  validateName(event);
+  validatePayment(event);
 }
 
-// function which checks the validity of the email address
-function validEmailAddress() {
-	var validEmail = new RegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);
-	return validEmail.test($("#mail").val());
-}
+// validate form on submit
+form.addEventListener('submit', validate);
+// real-time validation of email, name, activities
+mail.addEventListener('input', validateEmail);
+name.addEventListener('input', validateName);
+activities.forEach(e => e.addEventListener('change', validateActivities))
 
-// function which checks to see if a tee-shirt has been selected .
-function teeShirtSelected() {
-		return (!($("#design").val() == "Select Theme")) ? true : false;
-}
-
-// function which determines if an activity has been selected by user
-function activitySelected() {
-	var selectedActivityCount = 0;
-	$.each($("input[type='checkbox']"), function() {
-		if ($(this).prop("checked")) {
-			selectedActivityCount += 1;
-		}
-	});
-	return (selectedActivityCount > 0) ? true : false;
-}
-
-// function which determins if a zip code and 3 digit ccv number has been selected
-// I didn't validate these, I could but it's time to move on to the next project, and it's an unrequested feature.
-function ccvAndZipEntered() {
-	var zipVal = /^\d{5}$|^\d{5}-\d{4}$/;
-	var cvvVal = /^\d{3}$/;
-	return zipVal.test($("#zip").val()) && cvvVal.test($("#cvv").val());
-}
-
-// functioin which checks the validity of the credit card number entered
-// pulled this from DiegoSalazar on github. I don't need to reinvent the wheel
-function validCreditCard(value) {
-  // accept only digits, dashes or spaces
-	if (/[^0-9-\s]+/.test(value)) return false;
-	// The Luhn Algorithm.
-	var nCheck = 0, nDigit = 0, bEven = false;
-	value = value.replace(/\D/g, "");
-	for (var n = value.length - 1; n >= 0; n--) {
-		var cDigit = value.charAt(n),
-			  nDigit = parseInt(cDigit, 10);
-		if (bEven) {
-			if ((nDigit *= 2) > 9) nDigit -= 9;
-		}
-		nCheck += nDigit;
-		bEven = !bEven;
-	}
-	return (nCheck % 10) === 0;
-}
-
-function empty() {
-    var x;
-    x = document.getElementById("activities, credit-card").value;
-    if (x == "") {
-        alert("Enter a Valid Roll Number");
-        return false;
-    };
-}
-isFormValid();
 // function which resets the form colors on submission, so they are black if corrected
 function resetFormColors() {
 	$(".shirt legend p").remove();
