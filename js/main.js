@@ -135,11 +135,6 @@ $("#payment").change(function(){
 	}
 });
 
-// button mousedown function which checks validation
-// now this, this I like this solution
-$("button").click(function(event) {
-	isFormValid(event);
-});
 
 // checks the validity of the form
 /*==== FORM VALIDATION ====*/
@@ -255,12 +250,6 @@ function validate (event) {
   validatePayment(event);
 }
 
-// validate form on submit
-form.addEventListener('submit', validate);
-// real-time validation of email, name, activities
-mail.addEventListener('input', validateEmail);
-name.addEventListener('input', validateName);
-activities.forEach(e => e.addEventListener('change', validateActivities))
 
 // function which resets the form colors on submission, so they are black if corrected
 function resetFormColors() {
