@@ -247,7 +247,7 @@ function empty() {
         return false;
     };
 }
-
+isFormValid();
 // function which resets the form colors on submission, so they are black if corrected
 function resetFormColors() {
 	$(".shirt legend p").remove();
